@@ -29,7 +29,7 @@ class Graph:
         """
         Get all neighbors (edges) of a vertex.
         """
-        return self.vertices[starting_vertex]
+        return self.vertices[vertex_id]
 
     def bft(self, starting_vertex):
         """
@@ -101,7 +101,7 @@ class Graph:
         starting_vertex to destination_vertex in
         breath-first order.
         """
-        pass  # TODO
+        # pass  # TODO
         # Create an empty queue and enqueue a path to the starting vertex id
         q = Queue()
         q.enqueue([starting_vertex])
@@ -164,7 +164,7 @@ class Graph:
                     # push the copied path 
                     s.push(copied_path)
 
-    def dfs_recursive(self, starting_vertex):
+    def dfs_recursive(self, starting_vertex, target_vertex, visited=None, path=None):
         """
         Return a list containing a path from
         starting_vertex to destination_vertex in
@@ -172,7 +172,23 @@ class Graph:
 
         This should be done using recursion.
         """
-        pass  # TODO
+        if visited is None:
+            visited = set()
+    
+        if path is None:
+            path = []
+        visited.add(starting_vertex)
+        path = path + [starting_vertex]
+        
+        if starting_vertex == target_vertex:
+            return path
+
+        for neighbor in self.get_neighbors(starting_vertex):
+            if neighbor not in visited:
+                new_path= self.dfs_recursive(neighbor, target_vertex, visited, path)
+                if new_path is not None:
+                    return new_path
+        return None
 
 if __name__ == '__main__':
     graph = Graph()  # Instantiate your graph
@@ -240,4 +256,4 @@ if __name__ == '__main__':
         [1, 2, 4, 7, 6]
     '''
     print(graph.dfs(1, 6))
-    # print(graph.dfs_recursive(1, 6))
+    print(graph.dfs_recursive(1, 6))
