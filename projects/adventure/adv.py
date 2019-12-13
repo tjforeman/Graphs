@@ -4,6 +4,19 @@ from world import World
 
 import random
 
+class Queue():
+    def __init__(self):
+        self.queue = []
+    def enqueue(self, value):
+        self.queue.append(value)
+    def dequeue(self):
+        if self.size() > 0:
+            return self.queue.pop(0)
+        else:
+            return None
+    def size(self):
+        return len(self.queue)
+
 # Load world
 world = World()
 
@@ -25,6 +38,69 @@ player = Player("Name", world.startingRoom)
 traversalPath = []
 
 
+
+graph = {}
+
+graph[0] = {"n": "?", "e": "?", "s": "?", "w": "?"}
+
+def bfs(starting_room):
+    q = Queue()
+    q.enqueue([starting_room])
+    visited = set()
+
+    while q.size() > 0: 
+        path = q.dequeue()
+        v = path[-1]
+
+        if v not in visited:
+            visited.add(v)
+
+            for i in graph[v]:
+                if graph[v][i] == '?':
+                    return path
+
+                else:
+                    new_path = path.copy()
+                    new_path.append(graph[v][i])
+                    q.enqueue(new_path)
+
+def find_exits(rooms):
+    current_room = rooms[0]
+    exits = []
+
+    for i in rooms:
+        for path_out in graph[current_room]:
+            if i == graph[current_room][path_out]:
+                exits.append(path_out)
+
+    return exits
+
+while len(graph) < 500:
+    current_room = player.currentRoom.id
+    unexplored = []
+    exits = {}
+
+    for i in graph[current_room]:
+        if graph[current_room][i] == '?':
+            unexplored.append(i)
+
+    if len(unexplored) > 0:
+        next_room = unexplored[0]
+
+        player.travel(next_room)
+        traversalPath.append(next_room)
+        previous_room = current_room
+        
+        if player.currentRoom.id not in graph:
+             graph[player.currentRoom.id] = {direction: '?' for direction in world.rooms[player.currentRoom.id].getExits()} 
+
+        graph[previous_room][next_room] = player.currentRoom.id
+
+    
+    elif bfs(player.currentRoom.id) != None:
+        for i in find_exits(bfs(player.currentRoom.id)):
+            traversalPath.append(i)
+            player.travel(i)
 
 # TRAVERSAL TEST
 visited_rooms = set()
